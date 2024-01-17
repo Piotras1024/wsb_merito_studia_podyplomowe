@@ -1,5 +1,7 @@
 import os
 import time
+import matplotlib.pyplot as plt
+
 
 class City_Analizer:
     def __init__(self, filename='dane.csv'):
@@ -26,21 +28,29 @@ class City_Analizer:
                 else:
                     self.cities[city] = {'total': height, 'number': 1}
 
+    @staticmethod
+    def calculate_average(city_data):
+        return city_data['total'] / city_data['number']
+
     def average_height(self, spec_city="", decimal_places=2):
-
-        def calculate_average(city_data):
-            return city_data['total'] / city_data['number']
-
         if spec_city:
             try:
-                average = calculate_average(self.cities[spec_city])
+                data = self.cities[spec_city]
+                average = City_Analizer.calculate_average(data)
                 print(f'W mieście {spec_city}: {average:.{decimal_places}f}')
             except KeyError:
                 print(f"Nie ma takiego miasta {spec_city}.")
         else:
             for city, data in self.cities.items():
-                average = calculate_average(data)
+                average = City_Analizer.calculate_average(data)
                 print(f'W mieście {city}: {average:.{decimal_places}f}')
+
+    def average(self, decimal_places=2):
+        averages = {}
+        for city_name, data in self.cities.items():
+            average_height = City_Analizer.calculate_average(data)
+            averages[city_name] = round(average_height, decimal_places)
+        return averages
 
     def show_cities(self, spec_city=""):
         if spec_city:
@@ -49,25 +59,17 @@ class City_Analizer:
             for city in self.cities.keys():
                 print(city)
 
-
-def main():
-    cities_data = City_Analizer()
-    while True:
-        choose = input("Podaj miasto ( 'exit' ) aby wyjść").capitalize()
-        cities_data.load_data()
-        if choose.lower() == "exit":
-            print('Narazie')
-            break
-        elif choose == "":
-            cities_data.show_cities(choose)
-            cities_data.average_height(choose)
-        elif choose not in cities_data.cities.keys():
-            print(f"{choose} - > Nie ma takiego miasta w bazie danych, spróbuj jeszcze raz !")
-        else:
-            print(f"Twoje miasto to {choose} !!!")
-            cities_data.average_height(choose)
+    def plot(self):
+        averages = self.average()
+        cities_name = list(averages.keys())
+        values_data = list(averages.values())
+        plt.figure(figsize=(10,6))
+        plt.bar(cities_name, values_data)
+        plt.title('Średni wzrost w różnych miastach')
+        plt.xlabel("Miasto")
+        plt.ylabel("Średni Wzrost")
+        plt.show()
 
 
-
-if __name__ == "__main__":
-    main()
+city = City_Analizer()
+city.plot()
